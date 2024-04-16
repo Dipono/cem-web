@@ -1,0 +1,284 @@
+#header {
+    background-color: rgba(0, 0, 0, 0.829);
+    display: flex;
+    color: rgb(255, 255, 255);
+    z-index: 1;
+    justify-content: space-between;
+}
+
+.image-logo {
+    margin: 10px 0 10px 100px;
+}
+
+.image-logo img {
+    width: 100px;
+    height: 100px;
+    border-radius: 100%;
+}
+
+.top-header {
+    display: flex;
+}
+
+.top-header li {
+    list-style: none;
+    margin: 30px 20px;
+}
+
+.group-form {
+    margin: 10px 0;
+}
+
+.top-header h4:hover {
+    cursor: pointer;
+    color: blue;
+}
+
+#btn-topics {
+    text-align: center;
+}
+
+#btn-topics button {
+    margin: 20px 50px;
+}
+
+@media screen and (max-width: 1500px) {
+    .link_nav {
+        font-size: 0.8em;
+    }
+}
+
+#cancel-popup {
+    text-align: right;
+    margin-top: 5px;
+}
+
+#popup-label {
+    text-align: center;
+}
+
+#cancel-popup:hover {
+    cursor: pointer;
+}
+
+/*======================================   Home   =============================================*/
+.auth_label {
+    color: blue;
+}
+
+.loginregistration {
+    width: 50%;
+    margin: auto;
+    padding-bottom: 50px;
+    margin-top: 100px;
+}
+
+.loginregistration h2 {
+    text-align: center;
+}
+
+.loginregistration label,
+.loginregistration .form-control {
+    font-size: 1.2em;
+}
+
+.remember-forgot{
+    margin: 5px 20px;
+    font-size: 1.2em;
+}
+
+.login-register{
+    margin: 5px 20px;
+}
+
+#otp-popup{
+    text-align: center;
+}
+
+#otp-popup input{
+    text-align: center;
+    border: none;
+    border-bottom: 2px solid grey;
+}
+
+/*=======================================    Customer Dash   ===================================*/
+.label-header {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 30px;
+}
+
+.visualization {
+    display: flex;
+}
+
+.pie-display,
+.bar-graph {
+    width: 40%;
+    margin: auto;
+}
+
+/*=======================================    FORUM    ===========================================*/
+
+.content {
+    display: flex;
+}
+
+.left {
+     width: 60%; 
+     margin: 10px;
+}
+
+.right {
+    float: right;
+    float: left;
+    position: fixed;
+    width: 30%;
+    right: 1%;
+}
+
+.right img {
+    width: 80%;
+    margin: auto;
+}
+
+.forum-topic {
+    border-bottom: 2px solid gray;
+    margin: 10px;
+}
+
+.commentlist {
+    overflow-y: auto;
+    height: 70vh;
+}
+
+.post-comment {
+    margin-top: 20px;
+    border-bottom: 2px solid gray;
+    padding: 5px 20px;
+}
+
+.comment {
+    font-size: 1.3em;
+    font-weight: 500;
+}
+
+.btn-comment{
+    display: flex;
+}
+
+/* ====================================== Reporting  =======================================  */
+
+.reporting {
+    margin: 50px;
+
+}
+
+.reporting select {
+    font-size: 1.1em;
+    font-weight: 400;
+}
+
+.reporting label {
+    margin-left: 5px;
+    font-size: 1.1em;
+    font-weight: 400;
+}
+
+.attandance-option {
+    margin: 30px 20px;
+    font-size: 1.2em;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+}
+
+.attandance-option span label {
+    margin: 10px;
+}
+
+.scroll-search:active{
+    overflow-y: scroll;
+    height: 100px;
+}
+
+
+/*===================================    Admin Landing Page   =====================================*/
+
+/*====================================  Admin consulting   ======================================*/
+#customers {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  #customers td, #customers th {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  #customers tr:nth-child(even){background-color: #f2f2f2;}
+  
+  #customers tr:hover {background-color: #ddd;}
+  
+  #customers th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: rgba(0, 0, 212, 0.836);
+    color: white;
+  }
+
+  .send-respond{
+    margin: 10px;
+  }
+  
+  .send-respond input{
+    margin-top: 10px;
+  }
+
+    
+  .send-respond button{
+    margin-top: 10px;
+  }
+
+  #response-popup{
+    display: flex;
+  }
+
+  #left-respond{
+    width: 60%;
+  }
+
+
+  #respond{
+    font-size: 0.8em;
+    margin: 10px;
+  }
+  .individual-respond{
+    border: 1px solid grey;
+    border-radius: 25px;
+   margin: 15px;
+   padding: 0 5px;
+  }
+
+  #send-status{
+    padding-bottom: 5px;
+  }
+
+  #initials-circle{
+    background-color: aqua;
+    border-radius: 100%;
+    padding: 5px;
+  }
+
+  #status-color{
+    background-color: aqua;
+    padding: 5px;
+    border-radius: 100%;
+  }
+
+  #status{
+    font-size: 1.3em;
+    font-weight: 500;
+  }

@@ -1,0 +1,30 @@
+
+
+.register-popup{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vh;
+    background-color: rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+}
+
+.register-popup-inner{
+    padding: 0 40px 40px 40px;
+    width: 100%;
+    /* max-width: 640px; */
+    background-color: white;
+    position: relative;
+}
+
+.popup-inner-header {
+    position: absolute;
+    font-size: 2em;
+    transform: translate(-50%, -50%);
+    text-align: right;
+    right: 15px;
+}
