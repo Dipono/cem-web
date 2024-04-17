@@ -2,8 +2,9 @@ import Header from './Header';
 import PopUp from '../Popup';
 import '../../assets/style/style.css';
 import callIcon from '../../assets/call-history-svgrepo-com.svg';
-import { useState } from 'react';
-import axios from 'axios'
+import { useEffect, useState } from 'react';
+import { api } from '../../data/API';
+import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
@@ -11,41 +12,91 @@ import { useNavigate } from 'react-router-dom';
 
 function Consult() {
 
-    const CallLogs = [{name: "James", surname: "Scott", phoneNo: "0123456789", date: "12/04/2024", time: "12:23", reporter: "Myself", issue: "call", closed: false, description: "Repetitive tasks, strict performance and dealing with irate customers can lead to agent burnout and high turnover rates.", response: [{
-            respondMessage: "I am going to help you", date: "12/04/2024", time: "12:40", id: "2"
-        }, { respondMessage: "When are going to assist", date: "12/04/2024", time: "12:50", id: "1" },]
-    },
-    {name: "William", surname: "Molamo", phoneNo: "0123456789", date: "12/04/2024", time: "12:23", reporter: "Myself", issue: "call", closed: true, description: "Repetitive tasks, strict performance and dealing with irate customers can lead to agent burnout and high turnover rates.", response: [{
-        respondMessage: "I am going to help you", date: "12/04/2024", time: "12:40", id: "5"
-    }, { respondMessage: "When are going to assist", date: "12/04/2024", time: "12:50", id: "1" },]
-},
-]
     const [IsActiveLog, setIsActiveLog] = useState(true);
     const [IsCommunicationChannell, setIsCommunicationChannell] = useState(false);
 
     const [Response, setResponse] = useState([])
+    const [CallLogs, setCallLogs] = useState([])
     const [CallLog, setCallLog] = useState({})
     const [CustomerId, setCustomerId] = useState("1")
-    const [Myname, setMyname]= useState('Dimakatso');
-    const [Mysurname, setsurMyname]= useState('Maake');
 
+    const [AllComplains, setAllComplains] = useState([])
     const [Feedback, setFeedback] = useState('');
+    const [UserId, setUserId] = useState(0);
+
+    useEffect(() => {
+        setUserId(Number(localStorage.getItem('user_id')))
+        axios.get(api + "GetAllComplainList").then((respond) => {
+
+            var result = respond.data
+            setAllComplains(respond.data)
+            setCallLogs(result.filter(value => {
+                return value.closed === true
+            }))
+        }, err => {
+            console.log(err)
+        })
+
+    }, [])
+
+    //
 
     function handleAddPopup() {
         document.body.style.overflow = 'unset';
     }
 
     function activeLogs() {
+        setCallLogs(AllComplains.filter(value => {
+            return value.closed === false
+        }))
         setIsActiveLog(true)
     }
     function closedLogs() {
+        setCallLogs(AllComplains.filter(value => {
+            return value.closed === true
+        }))
         setIsActiveLog(false)
     }
 
     function view_for_feedback(data) {
+        console.log(data)
+        console.log(Number(localStorage.getItem('user_id')))
         setCallLog(data)
+        var data = {
+            ComplainId: data.id
+        }
+        axios.post(api + "UserComplainResponseListByUserId", data).then((respond) => {
+            console.log(respond.data)
+            setResponse(respond.data);
+        }, err => {
+            console.log(err)
+        })
+        console.log(data)
         setIsCommunicationChannell(true)
-        setResponse(data.response)
+        //setResponse(data.response)
+    }
+
+    function close_log(event) {
+        axios.post(api + "UpdateClosedLog", event).then((respond) => {
+            console.log(respond.data)
+            toast.success("respond.data", {
+                position: "top-center",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000)
+        }, err => {
+            console.log(err)
+        })
+
     }
 
     function submit_feedback() {
@@ -63,7 +114,28 @@ function Consult() {
             return;
         }
 
+        var data = {
+            UserId: UserId,
+            Respond: Feedback,
+            ComplainId: CallLog.complainId
 
+        }
+        console.log(data)
+
+        axios.post(api + "AddRespond", data).then((respond) => {
+            toast.warn(respond.data.message, {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+        }, err => {
+            console.log(err)
+        })
 
 
 
@@ -73,11 +145,11 @@ function Consult() {
 
     let response_popup = <>
         <h6 id='cancel-popup' onClick={() => setIsCommunicationChannell(false)}>X</h6>
-        {CallLog.closed ? <><label id='status-color' style={{backgroundColor:'orange'}}></label> <label id='status'>&ensp;Closed</label></>: 
-        <><label id='status-color' style={{backgroundColor:'green'}}></label> <label id='status'>&ensp;Active</label></>
+        {CallLog.closed ? <><label id='status-color' style={{ backgroundColor: 'orange' }}></label> <label id='status'>&ensp;Closed</label></> :
+            <><label id='status-color' style={{ backgroundColor: 'green' }}></label> <label id='status'>&ensp;Active</label></>
         }
-        
-        
+
+
         <div id='response-popup'>
             <div id='left-respond'>
                 <table>
@@ -90,46 +162,42 @@ function Consult() {
                         <td><b>:&ensp;{CallLog.phoneNo}</b></td>
                     </tr>
                     <tr>
-                        <td>Reporter </td>&emsp;
-                        <td><b>:&ensp;{CallLog.reporter}</b></td>
-                    </tr>
-                    <tr>
-                        <td>Reporter </td>&emsp;
-                        <td><b>:&ensp;{CallLog.issue}</b></td>
-                    </tr>
-                    <tr>
-                        <td>Date Loged </td>&emsp;
-                        <td><b>:&ensp;{CallLog.date} {CallLog.time}</b></td>
+                        <td>Subject </td>&emsp;
+                        <td><b>:&ensp;{CallLog.subject}</b></td>
                     </tr>
                     <tr>
                         <td>Description</td>&emsp;
-                        <td><b>&ensp;<textarea value={CallLog.description} disabled className='form-control' cols='50'></textarea></b></td>
+                        <td><b>&ensp;<textarea value={CallLog.subjectDescription} disabled className='form-control' cols='50'></textarea></b></td>
                     </tr>
                 </table>
             </div>
             <div id='right-respond'>
-                {Response.map((respond, xid) => (
-                    <div id='respond'>
-                        {CustomerId === respond.id && <>
-                            <labe id="initials-circle">{Myname.substring(0, 1)}{Mysurname.substring(0, 1)}</labe>
-                            <br />
-                            <span className='individual-respond'>{respond.respondMessage}</span><br />
-                            {/* <label id='send-status'>send</label> */}
-                        </>
-                        }
+                {Response.length > 0 && <>
+                    {Response.map((respond, xid) => (
+                        <div id='respond'>
+                            {UserId === respond.userId && <>
+                                <labe id="initials-circle">You</labe>
+                                <br />
+                                <span className='individual-respond'>{respond.respond}</span><br />
+                                {/* <label id='send-status'>send</label> */}
+                            </>
+                            }
 
-                        {CustomerId !== respond.id && <>
-                            <labe id="initials-circle">{CallLog.name.substring(0, 1)}{CallLog.surname.substring(0, 1)}</labe>
-                            <br />
-                            <span className='individual-respond'>{respond.respondMessage}</span><br />
-                            {/* <label id='send-status'>send</label> */}
-                        </>
-                        }
-                        {/* {CustomerId !== CallLog.id && <labe id="initials-circle">{CallLog.name.substring(0, 1)}{CallLog.surname.substring(0, 1)}</labe>} */}
+                            {UserId !== respond.userId && <>
+                                <labe id="initials-circle">{CallLog.name}</labe>
+                                <br />
+                                <span className='individual-respond'>{respond.respond}</span><br />
+                                {/* <label id='send-status'>send</label> */}
+                            </>
+
+                            }
+                            {/* {CustomerId !== CallLog.id && <labe id="initials-circle">{CallLog.name.substring(0, 1)}{CallLog.surname.substring(0, 1)}</labe>} */}
 
 
-                    </div>
-                ))}
+                        </div>
+                    ))}
+
+                </>}
 
             </div>
         </div>
@@ -153,23 +221,23 @@ function Consult() {
                         <thead>
                             <th>Contact No</th>
                             <th>Name and Surname</th>
-                            <th>Reporter</th>
-                            <th>Issue</th>
                             <th>Date and Time</th>
+                            <th>Issue</th>
+                            <th>Description</th>
                             <th>Feedback</th>
-                            <th>Close</th>
+                            <th hidden={!IsActiveLog}>Close</th>
                         </thead>
                         <tbody>
 
                             {CallLogs.map((log, xid) => (
-                                <tr>
+                                <tr key={xid}>
                                     <td>{log.phoneNo}</td>
-                                    <td>{log.name} {log.surname}</td>
-                                    <td>{log.reporter}</td>
-                                    <td>{log.issue}</td>
-                                    <td>{log.date} {log.time}</td>
+                                    <td style={{ width: "15%" }}>{log.name} {log.surname}</td>
+                                    <td style={{ width: "15%" }}>{log.dateCreated.substring(0, 10)} {log.dateCreated.substring(11, 16)}</td>
+                                    <td>{log.subject}</td>
+                                    <td style={{ width: "30%" }}>{log.subjectDescription}</td>
                                     <td><button className='btn btn-success form-control' onClick={() => view_for_feedback(log)}>View</button></td>
-                                    <td></td>
+                                    {log.satisfied ? <td hidden={log.closed}><button className='btn btn-success form-control' onClick={() => close_log(log)} >Close</button></td> : ''}
                                 </tr>
                             ))}
                         </tbody>

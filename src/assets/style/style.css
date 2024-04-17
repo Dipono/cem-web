@@ -61,6 +61,8 @@
     cursor: pointer;
 }
 
+
+
 /*======================================   Home   =============================================*/
 .auth_label {
     color: blue;
@@ -250,6 +252,14 @@
     width: 60%;
   }
 
+  #right-respond{
+    border:2px solid gray;
+    background-color: rgba(128, 128, 128, 0.562);
+    width: 100%;
+    overflow-y: auto;
+    height: 50vh;
+    
+}
 
   #respond{
     font-size: 0.8em;

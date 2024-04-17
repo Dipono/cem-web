@@ -1,5 +1,6 @@
 import '../assets/style/style.css';
 import PopUp from './Popup';
+import { api } from '../data/API'
 
 import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify';
@@ -19,7 +20,7 @@ function Home() {
     const [Surname, setSurname] = useState('');
     const [Email, setEmail] = useState('');
     const [Name, setName] = useState('')
-    const [MobileNo, setMobileNo] = useState('')
+    const [PhoneNo, setPhoneNo] = useState('')
 
 
     function handleAddPopup() {
@@ -27,9 +28,9 @@ function Home() {
     }
 
     const submitLogin = () => {
-        navigate('/service_provider_dashboard')
+
         if (Email === "" && Password === "") {
-            toast.warn("Please enter both email and password", {
+            toast.warn("Please enter both phone number and password", {
                 position: "top-center",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -41,8 +42,8 @@ function Home() {
             });
             return;
         }
-        if (Email === "") {
-            toast.warn("Please enter email", {
+        if (PhoneNo === "") {
+            toast.warn("Please enter phone number", {
                 position: "top-center",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -68,23 +69,23 @@ function Home() {
             return;
         }
         var data = {
-            email: Email,
+            phoneNo: PhoneNo,
             password: Password
         }
-        /*
-        axios.post(api + "login", data).then((respond) => {
+
+        axios.post(api + "Login", data).then((respond) => {
             if (respond.data.success) {
-                console.log(respond.data.result[0])
-                localStorage.setItem('user_id', JSON.stringify(respond.data.result[0].alumni_id))
-                localStorage.setItem('user_name', JSON.stringify(respond.data.result[0].alumni_name + ' ' + respond.data.result[0].alumni_surname))
-                localStorage.setItem('user_email', JSON.stringify(respond.data.result[0].email))
-                localStorage.setItem('user_role', JSON.stringify(respond.data.result[0].role))
-                localStorage.setItem('user_phoneNo', JSON.stringify(respond.data.result[0].mobileNo))
-                if (respond.data.result[0].role === "alumni") {
-                    navigate('/alumni_dashboard')
+                console.log(respond.data.results)
+                localStorage.setItem('user_id', JSON.stringify(respond.data.results.id))
+                localStorage.setItem('user_name', JSON.stringify(respond.data.results.name + ' ' + respond.data.results.surname))
+                localStorage.setItem('user_email', JSON.stringify(respond.data.results.email))
+                localStorage.setItem('user_role', JSON.stringify(respond.data.results.role))
+                localStorage.setItem('user_phoneNo', JSON.stringify(respond.data.results.phoneNo))
+                if (respond.data.results.role === "customer") {
+                    navigate('/customer_dashboard')
                 }
                 else {
-                    navigate('/director_dashboard')
+                    navigate('/service_provider_dashboard')
                 }
             }
             else {
@@ -101,7 +102,7 @@ function Home() {
             }
         }, err => {
             console.log(err)
-        })*/
+        })
     }
 
     const submitRegister = () => {
@@ -144,7 +145,7 @@ function Home() {
             });
             return;
         }
-        if (MobileNo === "") {
+        if (PhoneNo === "") {
             toast.warn("Please enter mobile number", {
                 position: "top-center",
                 autoClose: 5000,
@@ -252,63 +253,53 @@ function Home() {
             return;
         }
 
+
+
+        var registerAlumni = {
+            Name: Name,
+            Surname: Surname,
+            Email: Email,
+            Password: Password,
+            PhoneNo: PhoneNo
+        }
+
+        axios.post(api + "Register", registerAlumni).then(respond => {
+            if (respond.data.success) {
+                toast.success(respond.data.message, {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+                var alumniId = respond.data.alumniId
+                navigate('/otp', { state: alumniId })
+
+                // setTimeout(() => {
+                //     window.location.reload();
+                // }, 5000)
+            }
+            else {
+                toast.error(respond.data.message, {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+                return;
+            }
+        })
+
         setSendOTP(false)
         setIsLogin(true)
-        toast.success("Successfully registered", {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-        });
-        return;
-        /*
-        
-      var registerAlumni = {
-          alumni_name: Name,
-          alumni_surname: Surname,
-          email: Email,
-          password: Password,
-          mobileNo: MobileNo
-      }
-      
-      axios.post(api + "register", registerAlumni).then(respond => {
-          if (respond.data.success) {
-              toast.success(respond.data.message, {
-                  position: "top-right",
-                  autoClose: 3000,
-                  hideProgressBar: false,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  progress: undefined,
-                  theme: "light",
-              });
-              var alumniId = respond.data.alumniId
-              navigate('/otp', { state: alumniId })
-              
-              // setTimeout(() => {
-              //     window.location.reload();
-              // }, 5000)
-          }
-          else {
-              toast.error(respond.data.message, {
-                  position: "top-right",
-                  autoClose: 3000,
-                  hideProgressBar: false,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  progress: undefined,
-                  theme: "light",
-              });
-              return;
-          }
-      })
-      */
+
     }
 
     let otp_popup = <>
@@ -326,8 +317,8 @@ function Home() {
             {IsLogin && <div class="">
                 <h2>Login</h2>
                 <div class="form-group">
-                    <label>Email</label>
-                    <input type="text" className="form-control" onChange={(event) => setEmail(event.target.value)} placeholder="email" required />
+                    <label>Phone number</label>
+                    <input type="text" className="form-control" onChange={(event) => setPhoneNo(event.target.value)} placeholder="phone number" required />
                 </div>
                 <div class="form-group">
                     <label>Password</label>
@@ -362,7 +353,7 @@ function Home() {
                 </div>
                 <div class="form-group">
                     <label>Mobile Number</label>
-                    <input type="email" className="form-control" onChange={(event) => setMobileNo(event.target.value)} placeholder="Phone Number" />
+                    <input type="email" className="form-control" onChange={(event) => setPhoneNo(event.target.value)} placeholder="Phone Number" />
                 </div>
                 <div class="form-group">
                     <label>Password</label>
