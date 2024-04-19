@@ -77,7 +77,7 @@ function Home() {
             if (respond.data.success) {
                 console.log(respond.data.results)
                 localStorage.setItem('user_id', JSON.stringify(respond.data.results.id))
-                localStorage.setItem('user_name', JSON.stringify(respond.data.results.name + ' ' + respond.data.results.surname))
+                localStorage.setItem('user_name', JSON.stringify(respond.data.results.surname))
                 localStorage.setItem('user_email', JSON.stringify(respond.data.results.email))
                 localStorage.setItem('user_role', JSON.stringify(respond.data.results.role))
                 localStorage.setItem('user_phoneNo', JSON.stringify(respond.data.results.phoneNo))

@@ -30,6 +30,7 @@ function Report() {
     const [UserId, setUserId] = useState(0);
 
     useEffect(() => {
+        setName(JSON.parse(localStorage.getItem('user_name')) )
         setUserId(Number(localStorage.getItem('user_id')))
         var data = {
             UserId: Number(localStorage.getItem('user_id'))
@@ -356,6 +357,7 @@ function Report() {
 
                     <div className='right'>
                         <img src={reportingIcon} alt="" />
+                        <h5>Hi {Name}, how can we help you?</h5>
                     </div>
                 </div>
             </div>

@@ -3,6 +3,10 @@ import PopUp from '../Popup';
 import '../../assets/style/style.css';
 import forumIcon from '../../assets/discussion-svgrepo-com.svg';
 import { useEffect, useState } from 'react';
+import { api } from '../../data/API';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Home() {
 
@@ -44,6 +48,7 @@ function Home() {
     const [MyTopicSelected, setMyTopicSelected] = useState(true);
 
     useEffect(() => {
+
         setAllCustomerIssues(data)
         setCustomerIssues(data.filter(values => {
             return values.custId === 1
@@ -63,7 +68,7 @@ function Home() {
             return values.custId === 1
         }))
     }
-    
+
     function allTopics() {
         setMyTopicSelected(false)
         setCustomerIssues(AllCustomerIssues)
@@ -77,7 +82,46 @@ function Home() {
     }
 
     function add_issue() {
-        setAddPopUp(false)
+        var data = {
+            Topic: Title,
+            TopicDescription: Description,
+            UserId: Number(localStorage.getItem('user_id'))
+        }
+        
+        axios.post(api + "AddToForum", data).then((respond) => {
+            console.log(respond)
+            if(respond.data.success){
+                toast.success(respond.data.message, {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+    
+                setTimeout(() => {
+                    window.location.reload();
+                }, 5000)
+                setAddPopUp(false)
+            }
+            else{
+                toast.error(respond.data.message, {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+            }
+        }, err => {
+            console.log(err)
+        })
     }
 
     function submit_comment() {
@@ -127,6 +171,7 @@ function Home() {
     return (
         <div>
             <Header />
+            <ToastContainer />
             <PopUp trigger={CommentPopUp} setTrigger={handleAddPopup}>{view_post_comments}</PopUp>
             <PopUp trigger={AddPopUp} setTrigger={handleAddPopup}>{add_topic}</PopUp>
 
