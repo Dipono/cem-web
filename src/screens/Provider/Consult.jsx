@@ -1,13 +1,11 @@
 import Header from './Header';
 import PopUp from '../Popup';
 import '../../assets/style/style.css';
-import callIcon from '../../assets/call-history-svgrepo-com.svg';
 import { useEffect, useState } from 'react';
 import { api } from '../../data/API';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom';
 
 
 function Consult() {
@@ -25,13 +23,13 @@ function Consult() {
     const [UserId, setUserId] = useState(0);
 
     useEffect(() => {
-        setUserId(Number(localStorage.getItem('user_id')))
         axios.get(api + "GetAllComplainList").then((respond) => {
-
-            var result = respond.data
-            setAllComplains(respond.data)
+//
+            var result = respond.data.sort((a, b) => b.dateCreated.localeCompare(a.dateCreated))
+            console.log(respond.data)
+            setAllComplains(respond.data.sort((a, b) => b.dateCreated.localeCompare(b.dateCreated)))
             setCallLogs(result.filter(value => {
-                return value.closed === true
+                return value.closed === false
             }))
         }, err => {
             console.log(err)
@@ -79,7 +77,7 @@ function Consult() {
     function close_log(event) {
         axios.post(api + "UpdateClosedLog", event).then((respond) => {
             console.log(respond.data)
-            toast.success("respond.data", {
+            toast.success("Query has been resolved", {
                 position: "top-center",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -118,9 +116,8 @@ function Consult() {
             UserId: UserId,
             Respond: Feedback,
             ComplainId: CallLog.complainId
-
         }
-        console.log(data)
+
 
         axios.post(api + "AddRespond", data).then((respond) => {
             toast.warn(respond.data.message, {
@@ -167,7 +164,7 @@ function Consult() {
                     </tr>
                     <tr>
                         <td>Description</td>&emsp;
-                        <td><b>&ensp;<textarea value={CallLog.subjectDescription} disabled className='form-control' cols='50'></textarea></b></td>
+                        <td><b>&ensp;<textarea value={CallLog.subjectDescription} disabled rows="10" className='form-control' cols='50'></textarea></b></td>
                     </tr>
                 </table>
             </div>
@@ -201,10 +198,11 @@ function Consult() {
 
             </div>
         </div>
+        {!CallLog.closed ? 
         <div className='send-respond'>
             <textarea className='form-control' onChange={(event) => setFeedback(event.target.value)}></textarea>
             <button className='btn btn-primary form-control' onClick={submit_feedback}>Send</button>
-        </div>
+        </div>:""}
     </>
     return (
         <div>
@@ -214,7 +212,7 @@ function Consult() {
             <div className='section'>
                 <div id='btn-topics'>
                     <button className='btn btn-success' disabled={IsActiveLog} onClick={activeLogs}>Active Logs</button>
-                    <button className='btn btn-primary' disabled={!IsActiveLog} onClick={closedLogs}>Vlosed Logs</button>
+                    <button className='btn btn-primary' disabled={!IsActiveLog} onClick={closedLogs}>Closed Logs</button>
                 </div>
                 <div className=''>
                     <table id='customers'>
@@ -225,7 +223,7 @@ function Consult() {
                             <th>Issue</th>
                             <th>Description</th>
                             <th>Feedback</th>
-                            <th hidden={!IsActiveLog}>Close</th>
+                            <th hidden={!IsActiveLog}>Active</th>
                         </thead>
                         <tbody>
 

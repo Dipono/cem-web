@@ -3,7 +3,6 @@ import PopUp from '../Popup';
 import '../../assets/style/style.css';
 import reportingIcon from '../../assets/customer-service-svgrepo-com.svg';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import locations from '../../data/southafrica_data.json';
 import { api } from '../../data/API';
 import axios from 'axios';
@@ -11,13 +10,12 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function Report() {
-    const navigate = useNavigate();
     const [ComplainDescription, setComplainDescription] = useState("")
     const [Issue, setIssue] = useState("")
     const [Location, setLocation] = useState("")
+    const [Locations, setLocations] = useState([])
     let [Complains, setComplains] = useState([])
     let [IndividualComplain, setIndividualComplain] = useState([])
-    let [AllComplains, setAllComplains] = useState([])
     let [ComplainRespond, setComplainRespond] = useState([])
     const [Feedback, setFeedback] = useState('');
     const [IsCommunicationChannell, setIsCommunicationChannell] = useState(false);
@@ -30,17 +28,18 @@ function Report() {
     const [UserId, setUserId] = useState(0);
 
     useEffect(() => {
-        setName(JSON.parse(localStorage.getItem('user_name')) )
+        setLocations(locations.sort((a, b) => a.name.localeCompare(b.name)))
+        
+        setName(JSON.parse(localStorage.getItem('user_name')))
         setUserId(Number(localStorage.getItem('user_id')))
         var data = {
             UserId: Number(localStorage.getItem('user_id'))
         }
 
         axios.post(api + "ComplainListByUserId", data).then((respond) => {
-            setAllComplains(respond.data)
             if (respond.data.length > 0) {
                 console.log(respond.data)
-                setComplains(respond.data);
+                setComplains(respond.data.sort((a, b) => b.date.localeCompare(a.date)));
             }
             else {
                 setComplains([]);
@@ -122,68 +121,68 @@ function Report() {
         var data = {
             UserId: UserId,
             Respond: Feedback,
-            Id: IndividualComplain.id
+            Id: IndividualComplain.id,
+            ComplainId: IndividualComplain.id
         }
-        console.log(data)
-        
-                if (UpdateForSatisfied === true) {
-                    //update customer sertisfaction
-                    axios.post(api + "UpdateCustomerSatisfaction", data).then((respond) => {
-                        console.log(respond.data)
-                        toast.success(respond.data, {
-                            position: "top-center",
-                            autoClose: 3000,
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                            progress: undefined,
-                            theme: "light",
-                        });
+        console.log(IndividualComplain)
+
+        if (UpdateForSatisfied === true) {
+            //update customer sertisfaction
+            axios.post(api + "UpdateCustomerSatisfaction", data).then((respond) => {
+                console.log(respond.data)
+                toast.success("Sent successfully", {
+                    position: "top-center",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 5000)
+            }, err => {
+                console.log(err)
+            })
+
+
+        }
+        else {
             
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 5000)
-                    }, err => {
-                        console.log(err)
-                    })
-        
-        
-                }
-                else {
-                    if (Feedback === '') {
-                        toast.warn("You cannot submit empty fields", {
-                            position: "top-center",
-                            autoClose: 5000,
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                            progress: undefined,
-                            theme: "light",
-                        });
-                        return;
-                    }
-        
-                   
-        
-                    axios.post(api + "AddRespond", data).then((respond) => {
-                        toast.warn(respond.data.message, {
-                            position: "top-center",
-                            autoClose: 5000,
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                            progress: undefined,
-                            theme: "light",
-                        });
-                    }, err => {
-                        console.log(err)
-                    })
-        
-                }
-        
+            if (Feedback === '') {
+                toast.warn("You cannot submit empty fields", {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+                return;
+            }
+
+            axios.post(api + "AddRespond", data).then((respond) => {
+            toast.warn(respond.data.message, {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+        }, err => {
+            console.log(err)
+        })
+
+        }
+
 
         //set to false when submitted susccessfully
         setIsCommunicationChannell(false)
@@ -194,12 +193,9 @@ function Report() {
         {IndividualComplain.closed ? <><label id='status-color' style={{ backgroundColor: 'orange' }}></label> <label id='status'>&ensp;Closed</label></> :
             <><label id='status-color' style={{ backgroundColor: 'green' }}></label> <label id='status'>&ensp;Active</label></>
         }
-
-
         <div id='response-popup'>
             <div id='left-respond'>
                 <table>
-
                     <tr>
                         <td>Issue </td>&emsp;
                         <td><b>:&ensp;{IndividualComplain.subject}</b></td>
@@ -210,12 +206,12 @@ function Report() {
                     </tr> */}
                     <tr>
                         <td>Description</td>&emsp;
-                        <td><b>&ensp;<textarea value={IndividualComplain.complainDescription} disabled className='form-control' cols='50'></textarea></b></td>
+                        <td><b>&ensp;<textarea value={IndividualComplain.complainDescription} disabled className='form-control' rows="10" cols='50'></textarea></b></td>
                     </tr>
                 </table>
                 <div className="mb-3 form-group-confimation">
-                    <label>Are you satisfied? 
-                        <input type="checkbox" style={{ margin: '15px', height: '15px', width: '15px' }} disabled={IsLocked} 
+                    <label>Are you satisfied?
+                        <input type="checkbox" style={{ margin: '15px', height: '15px', width: '15px' }} disabled={IsLocked}
                             onChange={(event) => setUpdateForSatisfied(event.target.checked)} /></label>
                 </div>
             </div>
@@ -300,7 +296,7 @@ function Report() {
 
                         <div className='group-form'>
                             <label>Description</label>
-                            <textarea className='form-control' onChange={(event) => setComplainDescription(event.target.value)}></textarea>
+                            <textarea className='form-control' rows="10" onChange={(event) => setComplainDescription(event.target.value)}></textarea>
                         </div>
 
                         <div className='group-form'>
@@ -333,7 +329,7 @@ function Report() {
                                 <th>Issue</th>
                                 <th style={{ width: '50%' }}>Description</th>
                                 <th>Satisfied</th>
-                                <th>Cloded</th>
+                                <th>Active</th>
                                 <th>View</th>
                             </thead>
                             <tbody>
@@ -345,7 +341,7 @@ function Report() {
                                         <td>{complain.subject}</td>
                                         <td>{complain.complainDescription}</td>
                                         <td>{complain.satisfied ? <label>Yes</label> : <label>No</label>}</td>
-                                        <td>{complain.closed ? <label>Yes</label> : <label>No</label>}</td>
+                                        <td>{!complain.closed ? <label>Yes</label> : <label>No</label>}</td>
                                         {/* <td><button className='btn btn-primary' onClick={() => view_chat(complain)} disabled={complain.closed}>View</button></td> */}
                                         <td><button className='btn btn-primary' onClick={() => view_chat(complain)}>View</button></td>
 

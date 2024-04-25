@@ -1,0 +1,1 @@
+export const EmailAPI = 'http://localhost:3001/otp'

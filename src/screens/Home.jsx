@@ -1,6 +1,8 @@
 import '../assets/style/style.css';
 import PopUp from './Popup';
 import { api } from '../data/API'
+import { EmailAPI } from '../data/APIEmailOTP'
+import HomeHeader from './HomeHeader';
 
 import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify';
@@ -13,6 +15,8 @@ function Home() {
     const navigate = useNavigate();
     const [IsLogin, setIsLogin] = useState(true);
     const [SendOTP, setSendOTP] = useState(false);
+    const [ForgotPassword, setForgotPassword] = useState(false);
+
     const [OTPCode, setOTPCode] = useState('');
     const [EnterOTPCode, setEnterOTPCode] = useState('');
     const [Password, setPassword] = useState('');
@@ -21,7 +25,6 @@ function Home() {
     const [Email, setEmail] = useState('');
     const [Name, setName] = useState('')
     const [PhoneNo, setPhoneNo] = useState('')
-
 
     function handleAddPopup() {
         document.body.style.overflow = 'unset';
@@ -42,7 +45,7 @@ function Home() {
             });
             return;
         }
-        if (PhoneNo === "") {
+        if (Email === "") {
             toast.warn("Please enter phone number", {
                 position: "top-center",
                 autoClose: 5000,
@@ -69,7 +72,7 @@ function Home() {
             return;
         }
         var data = {
-            phoneNo: PhoneNo,
+            email: Email,
             password: Password
         }
 
@@ -82,10 +85,10 @@ function Home() {
                 localStorage.setItem('user_role', JSON.stringify(respond.data.results.role))
                 localStorage.setItem('user_phoneNo', JSON.stringify(respond.data.results.phoneNo))
                 if (respond.data.results.role === "customer") {
-                    navigate('/customer_dashboard')
+                    navigate('/report')
                 }
                 else {
-                    navigate('/service_provider_dashboard')
+                    navigate('/consult')
                 }
             }
             else {
@@ -106,6 +109,7 @@ function Home() {
     }
 
     const submitRegister = () => {
+
         if (Name === "") {
             toast.warn("Please enter name", {
                 position: "top-center",
@@ -228,17 +232,155 @@ function Home() {
             });
             return;
         }
-        setSendOTP(true);
+
         var random = Math.floor(100000 + Math.random() * 900000);
-        console.log(random)
+        var data = {
+            email: Email,
+            otp: random
+        }
+        console.log(data)
+
+        axios.post(EmailAPI, data).then(respond => {
+            if (!respond.data.success) {
+                toast.warn(respond.data.message, {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+                return;
+            }
+        }, err => {
+            console.log(err)
+        })
+
+        setSendOTP(true)
         setOTPCode(random);
+        console.log(random)
     }
 
     function forgetPassword() {
+        if (Email === "") {
+            toast.warn("Please enter email", {
+                position: "top-left",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+            return;
+        }
+        if (Password === "") {
+            toast.warn("Please enter password", {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+            return;
+        }
+        if (ConfirmPassword === "") {
+            toast.warn("Please enter password confirmation", {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+            return;
+        }
+        if (Password !== ConfirmPassword) {
+            toast.warn("Passwords do not match!", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+            return;
+        }
+        var regPass = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+        if (!Password.match(regPass)) {
+            toast.warn("Enter a strong password!", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+            return;
+        }
+
+        axios.get(api + "CheckExistingEmail/" + Email).then(found => {
+            if (found.data) {
+                axios.post(EmailAPI, data).then(respond => {
+                    if (!respond.data.success) {
+                        toast.warn(respond.data.message, {
+                            position: "top-center",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                        });
+                    }
+
+                }, err => {
+                    console.log(err)
+                })
+                setOTPCode(random);
+                setSendOTP(true)
+            }
+            else {
+                toast.warn("Cannot find the email...", {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+                return;
+            }
+        })
+
+        var random = Math.floor(100000 + Math.random() * 900000);
+        var data = {
+            email: Email,
+            otp: random
+        }
+
 
     }
 
     function confirmOTP() {
+
+
+
         if (Number(OTPCode) !== Number(EnterOTPCode)) {
             toast.error("Incorrect OTP number entered", {
                 position: "top-right",
@@ -253,14 +395,34 @@ function Home() {
             return;
         }
 
-
-
         var registerAlumni = {
             Name: Name,
             Surname: Surname,
             Email: Email,
             Password: Password,
             PhoneNo: PhoneNo
+        }
+
+        if (ForgotPassword) {
+            axios.post(api + "ChangePassword", registerAlumni).then(respond => {
+                if (respond.data) {
+                    toast.success("Successfully changed password", {
+                        position: "top-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                    });
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 5000)
+
+                }
+            })
+            return
         }
 
         axios.post(api + "Register", registerAlumni).then(respond => {
@@ -275,12 +437,10 @@ function Home() {
                     progress: undefined,
                     theme: "light",
                 });
-                var alumniId = respond.data.alumniId
-                navigate('/otp', { state: alumniId })
 
-                // setTimeout(() => {
-                //     window.location.reload();
-                // }, 5000)
+                setTimeout(() => {
+                    window.location.reload();
+                }, 5000)
             }
             else {
                 toast.error(respond.data.message, {
@@ -296,10 +456,8 @@ function Home() {
                 return;
             }
         })
-
         setSendOTP(false)
         setIsLogin(true)
-
     }
 
     let otp_popup = <>
@@ -317,16 +475,15 @@ function Home() {
             {IsLogin && <div class="">
                 <h2>Login</h2>
                 <div class="form-group">
-                    <label>Phone number</label>
-                    <input type="text" className="form-control" onChange={(event) => setPhoneNo(event.target.value)} placeholder="phone number" required />
+                    <label>Email address</label>
+                    <input type="text" className="form-control" onChange={(event) => setEmail(event.target.value)} placeholder="email address" required />
                 </div>
                 <div class="form-group">
                     <label>Password</label>
                     <input type="password" className="form-control" onChange={(event) => setPassword(event.target.value)} placeholder="password" required />
                 </div>
                 <div class="remember-forgot">
-                    <label onClick={forgetPassword}>Forgot Password?</label>
-
+                    <label>Forgot Password? <span onClick={() => setForgotPassword(true)} class="auth_label">here</span></label>
                 </div>
                 <div class="form-group">
                     <button class="btn btn-primary" onClick={submitLogin}>Login</button>
@@ -345,7 +502,6 @@ function Home() {
                 <div class="form-group">
                     <label>Surname</label>
                     <input type="text" className="form-control" onChange={(event) => setSurname(event.target.value)} placeholder="Surname" />
-
                 </div>
                 <div class="form-group">
                     <label>Email</label>
@@ -372,15 +528,41 @@ function Home() {
             </div>}
         </div>
 
+    let forgot_password = <div class="loginregistration">
+        <div class="">
+            <h2>Forgot password</h2>
+            <div class="form-group">
+                <label>Email address</label>
+                <input type="text" className="form-control" onChange={(event) => setEmail(event.target.value)} placeholder="email address" required />
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" className="form-control" onChange={(event) => setPassword(event.target.value)} placeholder="Password" />
+            </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" className="form-control" onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Password" />
+            </div>
+            <div class="remember-forgot">
+                <label>Login <span onClick={() => setForgotPassword(false)} class="auth_label">here</span></label>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary" type="submit" onClick={forgetPassword}>Reset</button>
+            </div>
+        </div>
+
+    </div>
     return (
-        <div className='content'>
+        <div>
+            <HomeHeader />
             <ToastContainer />
             <PopUp trigger={SendOTP} setTrigger={handleAddPopup}>{otp_popup}</PopUp>
 
             <div className='header'>
                 {/* <Header /> */}
             </div>
-            {loginPop}
+            {!ForgotPassword ? <>{loginPop}</> : <>{forgot_password}</>}
+
         </div>
     )
 }
